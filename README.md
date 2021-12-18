@@ -16,7 +16,7 @@ Exploratory Data Analysis: Univariate data visualization summaries are used to e
 
 Feature Analysis: The influence of each attribute is estimated through Feature Importance Analysis using classification regression. Also, multiple regression models are run to compare performance of each model. The parameters chosen by the model can be viewed as decisive features. Following are the  predictor variables: Release Year, Languages of Production, Popularity Score, IMDB Rating, IMDB Vote Count, Adult Rated (Y/N), Genre, Production Countries, Movie Run-time. The target variable is the ratio of Global Revenue and Budget, converted into a 1/0  to categorize a movie as Hit or Not Hit.
 
-Data Sources
+**Data Sources**
 The Movie Dataset: This is the primary data set. It contains following columns:
 Adult: A Boolean flag that tells whether a movie was ‘Adult’ rated or not
 Belongs to collection: Tells the collection a movie belongs to (eg. Lord of the Rings collection)
@@ -49,22 +49,25 @@ Budget: Budget of a movie, not necessarily in USD
 World-Wide Gross: Revenue earned by a movie globally
 Year: Release Year of a movie
 IMDB Ratings dataset: This data set is a repository of ~85k movies from IMDB. It is used to source only ratings of movies. The ratings data is continuous variable with range from 0-10
+	
+	
 Methods:
-Data Tidying
+**Data Tidying**
 The data contained a lot of issues and needed to be cleaned before use. The following steps are used to prepare and tidy the data:
 1.	Merge main data, ‘The Movie Dataset’ with ‘IMDB Movies Data’ and ‘IMDB Ratings Data’ to source Budget, Revenue, Release Year and Ratings of movies
 2.	Select Relevant features
 3.	“Genres” and “Production Countries” data was present in a form of {key:value} pair and needed to be split. Further, each cell was populated with multiple {key:value} pairs, indicating that a movie has multiple genres and multiple production countries. The first step to tidy this data was to extract only the values from the {key:value} pairs. This resulted in all genres/production countries being populated in a comma separated format. It was observed that overall, there were 20 unique genres and 111 production countries. Hence, 20 columns for each genre and 111 columns for each country were added to the dataset. Using the comma separated genres and countries in the first step, the 20 genre columns and 111 country columns were populated as 1 or 0. Thus, all genres and production countries a movie were obtained as separate features
 4.	Revenue and Budget Columns were populated with different currencies. Hence, they were converted to a single currency (USD) to bring the values on the same scale using the ‘priceR’ package. This package uses an API that sources exchange rates against USD of the current day from the world bank.
 5.	Y-Variable/Target variable: The Y-variable/Target variable of the model was created from the data. The ratio of the revenue and the budget was used to categorize a movie as ‘Hit’ or ‘Not Hit’. The value of the ratio greater than 1 was categorized as ‘Hit’ and less than 1 was categorized as ‘Not Hit’.
-Exploratory Data Analysis:
+
+**Exploratory Data Analysis:**
 
 Data scientists with the help of Exploratory data analysis (EDA) analyze and explore datasets and document important characteristics utilizing data visualization methods. It helps to determine how best to manipulate data sources to get the answers needed, and enables data scientists to discover patterns, identify anomalies, test hypotheses, or test assumptions. EDA is mainly used for studying what information can be inferenced other than formal modeling or hypothesis testing, which gives a better understanding of the variables in a data and the correlations between them. It can also help to determine if a particular statistical analysis method considered is suitable for analyzing the data. First developed by American mathematician John Tukey in the 1970s, the EDA method is still widely used in data retrieval processes.
  
+	![image](https://user-images.githubusercontent.com/93501171/146656563-15979f92-8517-499c-9f56-dfd415d76d1e.png)
+
 Figure 1: Distribution of Response Variable
 		
-
-
 
 Distribution of the Response Variable:	
 The response variable is calculated based on the ratio of already existing variables named revenue and budget. If the ratio of the revenue to budget comes out to be greater than 1, meaning profits were generated, it is marked as a hit movie, or is  not a hit otherwise. The distribution of the response variable can be seen from figure 1. As expected, the number of movies decreases with increase in Revenue to Budget ratio. Also, 51.4% of movies have Revenue to Budget ratio greater than 1. Thus 51.4% of the movies are categorized as ‘Hit’ and remaining as ‘Non-Hit’. The Y-variable thus has a balanced class.
@@ -101,7 +104,7 @@ As expected, these four Genres feature in the model.
 
 
 
-MODELLING:
+**MODELLING:**
 
 Modelling is the methodology of trying to make a Machine Learning model to take in our dataset and predict a target variable. It also includes minimizing error, optimizing feature weights and evaluating the model against different metrics such as Accuracy, Precision, Recall, F1-score, Area Under the Curve (AUC) etc. Four supervised machine learning models such as Logistic Regression, Decision Tree, KNN and Random Forest are chosen as models to train and test with our dataset.
 
