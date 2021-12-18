@@ -1,0 +1,234 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(tidy.opts = list(width.cutoff = 60), tidy = TRUE)
+```
+
+```{r warning=FALSE, message=FALSE }
+#Loading the csv file "movies_metadata.csv" from the folder in the drive, and storing it into the variable "stage_1"
+library("tidyverse")
+library("readr")
+library("stringr")
+library("dplyr")
+library("priceR")
+library("tibble")
+library("gridExtra")
+library("lemon")
+
+setwd(getwd())
+stage_1 <- as_tibble(read.csv("Movies_DataSet/movies_metadata.csv"))
+
+```
+
+
+```{r warning=FALSE, message=FALSE}
+#Dividing the list of columns into the ones that are to be kept and the ones to be reserved
+to_keep_columns <- c("adult","genres", "imdb_id","popularity","runtime","vote_count","production_countries","original_language","title")
+drop_columns <- c("belongs_to_collection","homepage","id","budget","poster_path","video","tagline","production_companies","overview","release_date","revenue","status","original_title","vote_average")
+```
+
+
+```{r warning=FALSE, message=FALSE}
+###All the functions
+
+#To check na values column wise
+fun <- function(x){
+    tmp <- is.na(x)
+    apply(tmp,2,sum)
+}
+
+## Function to convert columns containing Dictionaries to List:
+getAttribute <- function(vector) {
+    vector <- as.vector(str_split(vector, regex("[\\[{'':,}\\]]"))[[1]])
+    vector <- vector[!vector == "" & !vector == " " ]
+    vector <- as.vector(vector[which(vector =="name")+1])
+    return(toString(vector))
+}
+
+## Converts Currecy as per today's curr value:
+convert_currency <- function(datum)
+{  
+  #retrives a list of currencies seen in datum
+  curr_type = unique(str_sub(datum,1,4))
+  
+  for (curr in curr_type){
+    #Fetches the currency Valye using priceR package
+    exch_rate = exchange_rate_latest(curr)
+    conversion_value = as.double(exch_rate[exch_rate[1] == "USD"])[2]
+    # Retrieved values in data with curr currency
+    sub_datum = datum[str_sub(datum,1,4)==curr]
+    for (data in sub_datum)
+    {
+      ind = which(datum == data)
+      value = as.double(str_sub(data,5))
+      res = as.integer(value * conversion_value)
+      datum[ind] = res
+    }
+  }
+  return(datum)
+}
+
+split_cols <- function(x,colname,df){
+    
+    ncols <- NULL
+    colm <- NULL
+    ncols <- max(stringr::str_count(x,", ")) + 1
+    colm <- paste(colname,1:ncols,sep="_")
+    
+    df <- tidyr::separate(data = df, col = colname, sep = ", ", into = colm, remove = FALSE)
+    unique_val_list <- data.frame(matrix(ncol = 1, nrow = 0))
+    colnames(unique_val_list) <- colm[1]
+    for(i in colm)
+    { 
+      colnames(unique_val_list) <- i
+      tmp <- as.data.frame(unique(df[,i]))
+      colnames(tmp) <- i 
+      unique_val_list <- rbind(as.data.frame(unique_val_list),tmp)
+    }
+
+    unique_val_list <- as.data.frame(unique(unique_val_list))
+    unique_val_list <- as.data.frame(na.omit(unique_val_list))
+    
+    for(i in 1:length(unique_val_list[,1]))
+    {
+        df[unique_val_list[i,1]] <- 0
+    }
+
+    for(i in 1:nrow(df))
+    {
+      for(j in colm)
+      { 
+        if(!is.na(df[i,j]))
+        {
+            k <- as.character(df[i,j])
+            df[i,k] = 1
+        } 
+      }
+    }
+    df <- select(df, -colm)
+    # filename <- paste(filename, ".csv")
+    # write.csv(unique_val_list,filename, row.names = FALSE)
+    return (df) 
+}
+```
+
+```{r warning=FALSE, message=FALSE}
+## Keeping necessary Columns only.
+stage_1 <- stage_1[to_keep_columns]
+head(stage_1)
+```
+
+```{r warning=FALSE, message=FALSE }
+## Converting all Dictionary kinda Cols into Lists
+stage_1$genres <- sapply(stage_1$genres,getAttribute, USE.NAMES = FALSE, simplify = "array") # Genres Column
+stage_1$production_countries <- sapply(stage_1$production_countries,getAttribute, USE.NAMES = FALSE, simplify = "array")
+
+head(stage_1)
+```
+
+```{r warning=FALSE, message=FALSE}
+#Replacing blank values with NA and then omitting the NAs.
+stage_1 <- stage_1 %>%
+  mutate(genres = ifelse(genres == '', NA, genres)) %>%
+  mutate(production_countries = ifelse(production_countries == '', NA, production_countries))
+
+head(stage_1)
+```
+
+```{r warning=FALSE, message=FALSE}
+# Joining the files movies metadata and IMDB movies.
+IMDB_movies <- as_tibble(read_csv("IMDb movies.csv",show_col_types = FALSE))
+IMDB_rating <- as_tibble(read_csv("IMDb ratings.csv",show_col_types = FALSE))
+stage_1 <- dplyr::inner_join(stage_1,
+                             select(IMDB_movies,year,imdb_title_id,director,budget,worlwide_gross_income),
+                             by = c("imdb_id" = "imdb_title_id"))
+stage_1 <- dplyr::inner_join(stage_1,
+                             select(IMDB_rating,imdb_title_id,weighted_average_vote),
+                             by = c("imdb_id" = "imdb_title_id"))
+stage_1 <- na.omit(stage_1)
+
+head(stage_1)
+```
+
+```{r warning=FALSE, message=FALSE}
+#Currency Conversion and Dollar Removal
+stage_1$budget[!str_detect(stage_1$budget, "^\\$")] = convert_currency(stage_1$budget[!str_detect(stage_1$budget, "^\\$")])# Currency Conversion
+stage_1$worlwide_gross_income[!str_detect(stage_1$worlwide_gross_income, "^\\$")] = convert_currency(stage_1$worlwide_gross_income[!str_detect(stage_1$worlwide_gross_income, "^\\$")]) # Currency Conversion
+stage_1 = na.omit(stage_1)
+
+stage_1$budget[str_detect(stage_1$budget, "^\\$")]= as.numeric(str_sub(stage_1$budget[str_detect(stage_1$budget, "^\\$")],3)) # Dollar removal
+stage_1$worlwide_gross_income[str_detect(stage_1$worlwide_gross_income, "^\\$")]= as.numeric(str_sub(stage_1$worlwide_gross_income[str_detect(stage_1$worlwide_gross_income, "^\\$")],3)) #Dollar Removal
+stage_1$budget = as.numeric(stage_1$budget)
+stage_1$worlwide_gross_income = as.numeric(stage_1$worlwide_gross_income)
+
+stage_1 = stage_1 %>% 
+  mutate("hit/not" = ifelse(worlwide_gross_income/ budget > 1.0, 1, 0))
+
+stage_1 <- na.omit(stage_1)
+
+png("11_stage_1_post_cc.png", height = 50*nrow(head(stage_1)), width = 200*ncol(head(stage_1)))
+grid.table(head(stage_1))
+
+png("12_stage_1_post_cc.png", height = 50*nrow(summary(stage_1)), width = 150*ncol(summary(stage_1)))
+grid.table(summary(stage_1))
+
+head(stage_1)
+```
+
+```{r warning=FALSE, message=FALSE}
+##Calling the split_cols function to convert production companies into columns and sparse filling the cells
+stage_1 <- as.data.frame(split_cols(stage_1$production_countries, "production_countries",stage_1))
+
+##Calling the split_cols function to convert genres into columns and sparse filling the cells
+stage_1 <- as.data.frame(split_cols(stage_1$genres, "genres",stage_1))
+
+png("13_stage_1_post_pivoting.png", height = 50*nrow(head(stage_1)), width = 200*ncol(head(stage_1)))
+grid.table(head(stage_1))
+
+png("14_stage_1_post_pivoting.png", height = 50*nrow(summary(stage_1)), width = 150*ncol(summary(stage_1)))
+grid.table(summary(stage_1))
+
+head(stage_1)
+```
+
+```{r warning=FALSE, message=FALSE}
+##Converting the abbreviations into full forms for langauage column
+lang_codes <- as_tibble(read_csv("language_codes_csv.csv",show_col_types = FALSE))
+stage_1 <- dplyr::left_join(stage_1,lang_codes,
+                             by = c("original_language" = "alpha2"),
+                            keep = FALSE)
+
+png("15_stage_1_post_lang_codes.png", height = 50*nrow(head(stage_1)), width = 200*ncol(head(stage_1)))
+grid.table(head(stage_1))
+
+png("16_stage_1_post_lang_codes.png", height = 50*nrow(summary(stage_1)), width = 150*ncol(summary(stage_1)))
+grid.table(summary(stage_1))
+
+head(stage_1)
+```
+
+```{r warning=FALSE, message=FALSE}
+##relocating the response variable to the last position column wise
+stage_1 <- relocate(stage_1, `hit/not`, .after = last_col())
+
+png("17_stage_1_post_relocation_n_final.png", height = 50*nrow(head(stage_1)), width = 200*ncol(head(stage_1)))
+grid.table(head(stage_1))
+
+png("18_stage_1_post_relocation_n_final", height = 50*nrow(summary(stage_1)), width = 150*ncol(summary(stage_1)))
+grid.table(summary(stage_1))
+
+
+```
+
+
+
+
+
+
+
+
+
