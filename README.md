@@ -1,5 +1,5 @@
 # Feature-Analysis
-Analyzing variables modeling clean data to determine factors that contribute to the success rate of a movie.
+Analyzing variables, modeling and data cleaning to determine factors that contribute to the success rate of a movie.
 
 
 **Feature Analysis of Movie Attributes :** <br />
