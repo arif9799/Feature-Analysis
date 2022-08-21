@@ -71,7 +71,7 @@ A basic model such as Logistic regression and kNN performed better with our data
 The reason Decision Tree has the worst, among the four, evaluation metrics might be due to presence of outliers in our training set.
 
 
-** To Conclude : **
+**To Conclude :**
 
 * Initial Data Analysis gave some interesting and unexpected relationships. Like how United States movies have more ‘Non-Hit’ in comparison to other countries. This can be associated with the fact that the US has released a greater number of movies. Or how the genre “Drama” has negative correlation with whether a movie becomes a hit or not. It is also observed how Production Country has a strong correlation with our target variable. Features such as Production countries, specific genres, and the budget put into a movie also matters. Even though there are exceptions to each of the above-mentioned factors, in general, it is seen that a hit movie would have to be in one of the 8 genres.
 
