@@ -1,20 +1,30 @@
-# Feature-Analysis
+<p align="center">
+  
+  ___
+</p>
+<h3 align="center">
+  
+  [Feature Analysis, _Supervised ML_](https://github.com/arif9799/Feature-Analysis)
+</h3>
+<br>
+
+<p align="center">
+  <img src="https://github.com/arif9799/arif9799/blob/main/gifs/FeatureAnalysis.gif" width="250" alt="Description">
+</p>
+<br>
+
+_RateVue: Decoding IMDb – A Feature Alchemy_ 
+
+Initialized with importing primary dataset of 45k+ records, merging it with secondary dataset to handle missing values of certain variables, then validating custom procedures focused on Data Wrangling, typecasting, pivoting erratic variables to Sparse Matrix and much more. Conducted Univariate Exploratory Data Analysis to explore relations among dependent and independent Variables. Trained the simple models namely Logistic Regression & kNN which outperformed complex ones such as Decision Tree & Random Forest.
+<br>
+<br>
+
 Analyzing variables, modeling and data cleaning to determine factors that contribute to the success rate of a movie.
 
 
 **Feature Analysis of Movie Attributes :** <br />
 A Movie can be classified as a successful movie or a ' hit' based on the revenue it earns for the budget put into its making. Of course, the story of the Movie plays a vital role in determining that. However, there could be hidden patterns in the movie attributes that have more influence over others in deciding whether a movie will be a hit or not. By analyzing various attributes of a movie, this project aims to achieve that.
 The project consisted of Exploratory Data Analysis and Statistical Modelling of a movies database from Kaggle – "The Movies Dataset". This database consisted of attributes such as Cast, Crew, Plot keyword, Budget, Revenue, Posters, Release date, Languages, Production, Companies, Countries, IMDB votes, IMDB Ratings, and Vote average.
-
-**The project goal is achieved by the following 3 steps.** <br />
-Importing and Tidying Data.<br />
-Exploratory Data Analysis.<br />
-Feature Analysis.<br />
-
-**Data Sources** <br />
-The Movie Dataset.<br />
-IMDB Movies dataset.<br />
-IMDB Ratings dataset.<br />
 
 
 
